@@ -241,7 +241,9 @@ function buildContainerArgs(
   // Inject GitHub token for gh CLI (git push, PRs, etc.)
   // Token is read fresh each container run from the host's gh auth.
   try {
-    const ghToken = execSync('gh auth token 2>/dev/null', { encoding: 'utf-8' }).trim();
+    const ghToken = execSync('gh auth token 2>/dev/null', {
+      encoding: 'utf-8',
+    }).trim();
     if (ghToken) {
       args.push('-e', `GH_TOKEN=${ghToken}`);
     }
