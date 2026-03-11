@@ -2,7 +2,7 @@
  * Container Runner for NanoClaw
  * Spawns agent execution in containers and handles IPC
  */
-import { ChildProcess, exec, spawn } from 'child_process';
+import { ChildProcess, exec, execSync, spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
@@ -236,6 +236,17 @@ function buildContainerArgs(
     args.push('-e', 'ANTHROPIC_API_KEY=placeholder');
   } else {
     args.push('-e', 'CLAUDE_CODE_OAUTH_TOKEN=placeholder');
+  }
+
+  // Inject GitHub token for gh CLI (git push, PRs, etc.)
+  // Token is read fresh each container run from the host's gh auth.
+  try {
+    const ghToken = execSync('gh auth token 2>/dev/null', { encoding: 'utf-8' }).trim();
+    if (ghToken) {
+      args.push('-e', `GH_TOKEN=${ghToken}`);
+    }
+  } catch {
+    // gh not installed or not authenticated — skip
   }
 
   // Runtime-specific args for host gateway resolution
